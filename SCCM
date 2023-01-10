@@ -1,0 +1,43 @@
+
+/* get the recoveryid details from SCCM */
+select a.Id, a.Name, b.VolumeId, c.RecoveryKeyId, c.RecoveryKey, c.LastUpdateTime, c.Disclosed from RecoveryAndHardwareCore_Machines a
+inner join RecoveryAndHardwareCore_Machines_Volumes b ON a.Id = b.MachineId
+inner join RecoveryAndHardwareCore_Keys c ON b.VolumeId = c.VolumeId
+where a.Name LIKE 'sccmpxetest003'
+
+
+/* get the missing package of task sequence on distribution point */
+SELECT DISTINCT TSR.PackageID
+,PS.PackageID
+,PSD.Name
+ 
+FROM v_TaskSequencePackageReferences AS TSR
+ 
+JOIN v_PackageStatus AS PS ON TSR.RefPackageID = PS.PackageID
+JOIN v_PackageStatusDetailSumm AS PSD ON TSR.RefPackageID = PSD.PackageID
+ 
+WHERE TSR.PackageID = '<TS PackageID>' AND PS.PackageID NOT IN (SELECT
+PS.PackageID FROM v_PackageStatus AS PS 
+JOIN v_TaskSequencePackageReferences AS TSR ON PS.PackageID = TSR.RefPackageID 
+WHERE PS.PkgServer like '%<Distribution Point Server>%')
+
+
+/* to find device by mac address */
+select Netbios_Name0, MAC_Addresses0,v_r_system.SMBIOS_GUID0 from v_RA_System_MACAddresses
+join v_R_System on v_RA_System_MACAddresses.ResourceID = v_R_System.ResourceID
+where MAC_Addresses0 like '10:62:E5:55:49:BD'
+
+/* to find device collection membership */
+select t.name,t.CollectionID, s.Name from v_FullCollectionMembership as t join v_Collection as s on s.CollectionID = t.CollectionID
+where t.name like 'sccmpxetest004'
+
+/* to find driver package drivers detail */
+select c.DriverINFFile,c.driverdate,c.DriverVersion,c.DriverClass,p.Name,p.PkgID from v_CI_DriversCIs as c join v_DriverContentToPackage as p on
+c.CI_ID=p.CI_ID where p.name = 'GLB-Latitude 3410'
+
+/* to find device from resourceid */
+select * from v_RA_System_MACAddresses
+where ResourceID like '16778748'
+
+select * from v_R_System as t join vSMS_TaskSequenceExecutionStatus as s on t.ResourceID=s.ResourceID
+where t.ResourceID like '16778748'"
